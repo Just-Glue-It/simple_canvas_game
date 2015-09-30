@@ -1,4 +1,3 @@
-
 // Create the canvas
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
@@ -42,7 +41,7 @@ var monstersCaught = 0;
 var keysDown = {};
 var bulletSpeed = 2;
 
-canvas.onclick = function(e) {
+canvas.onclick = function (e) {
     console.log(e.clientX, e.clientY, e.pageX, e.pageY);
     shoot(e.clientX, e.clientY);
 };
@@ -55,39 +54,43 @@ addEventListener("keyup", function (e) {
 	delete keysDown[e.keyCode];
 }, false);
 
-setInterval(function() {addMonster();}, 3000);
+setInterval(function () {addMonster();}, 3000);
 
-function addMonster() {
-    var monster = {};
-    monster.x = canvas.width;
-    monster.y = 32 + (Math.random() * (canvas.height - 64));
-    monster.vx = -1;
-    monster.vy = 0;
-    monsters.push(monster);
+var addMonster = function () {
+  var monster = {
+		x: canvas.width,
+		y: 32 + (Math.random() * (canvas.height - 64)),
+		vx: -1,
+		vy: 0
+	};
+  monsters.push(monster);
 }
 
-function shoot(x, y) {
-    var dx = x - hero.x;
-    var dy = y - hero.y;
-    var d = Math.sqrt(dx * dx + dy * dy);
+var shoot = function (x, y) {
+  var dx = x - hero.x;
+  var dy = y - hero.y;
+  var d = Math.sqrt(dx * dx + dy * dy);
 
-    var vx = dx / d * bulletSpeed;
-    var vy = dy / d * bulletSpeed;
+  var vx = dx / d * bulletSpeed;
+  var vy = dy / d * bulletSpeed;
 
-    bullets.push({x: hero.x,
-		  y: hero.y,
-		  vx: vx,
-		  vy: vy});
-    
+  bullets.push(
+		{
+			x: hero.x,
+	  	y: hero.y,
+	  	vx: vx,
+	  	vy: vy
+		}
+	);
 }
 
 var reset = function () {
 	hero.x = canvas.width / 2;
 	hero.y = canvas.height / 2;
 
-    // Throw the monster somewhere on the screen randomly
-    monsters = [];
-    addMonster();
+  // Throw the monster somewhere on the screen randomly
+  monsters = [];
+  addMonster();
 };
 
 // Update game objects
@@ -105,25 +108,25 @@ var update = function (modifier) {
 		hero.x += hero.speed * modifier;
 	}
 
-    // Are they touching?
-    for (var bullet of bullets) {
-	bullet.x += bullet.vx;
-	bullet.y += bullet.vy;
-    }
-    
-    for (var monster of monsters) {
-	if (
-		hero.x <= (monster.x + 32)
-		&& monster.x <= (hero.x + 32)
-		&& hero.y <= (monster.y + 32)
-		&& monster.y <= (hero.y + 32)
-	) {
-		++monstersCaught;
-		reset();
+	// Are they touching?
+	for (var bullet of bullets) {
+		bullet.x += bullet.vx;
+		bullet.y += bullet.vy;
 	}
-	monster.x += monster.vx;
-	monster.y += monster.vy;
-    }
+
+  for (var monster of monsters) {
+		if (
+			hero.x <= (monster.x + 32)
+			&& monster.x <= (hero.x + 32)
+			&& hero.y <= (monster.y + 32)
+			&& monster.y <= (hero.y + 32)
+		) {
+			++monstersCaught;
+			reset();
+		}
+		monster.x += monster.vx;
+		monster.y += monster.vy;
+	}
 };
 
 // Draw everything
@@ -136,17 +139,17 @@ var render = function () {
 		ctx.drawImage(heroImage, hero.x, hero.y);
 	}
 
-    if (monsterReady) {
-	for (var monster of monsters) {
-	    ctx.drawImage(monsterImage, monster.x, monster.y);
+  if (monsterReady) {
+		for (var monster of monsters) {
+		    ctx.drawImage(monsterImage, monster.x, monster.y);
+		}
+  }
+
+	for (var bullet of bullets) {
+		ctx.beginPath();
+		ctx.arc(bullet.x, bullet.y, 10, 0, 2*Math.PI);
+		ctx.stroke();
 	}
-    }
-    for (var bullet of bullets) {
-	
-	ctx.beginPath();
-	ctx.arc(bullet.x, bullet.y, 10, 0, 2*Math.PI);
-	ctx.stroke();
-    }
 	// Score
 	ctx.fillStyle = "rgb(250, 250, 250)";
 	ctx.font = "24px Helvetica";
