@@ -1,8 +1,9 @@
+
 // Create the canvas
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
-canvas.width = 512;
-canvas.height = 480;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 document.body.appendChild(canvas);
 
 // Background image
@@ -33,11 +34,18 @@ monsterImage.src = "images/monster.png";
 var hero = {
 	speed: 256 // movement in pixels per second
 };
-var monster = {};
+var monsters = [];
+var bullets = [];
 var monstersCaught = 0;
 
 // Handle keyboard controls
 var keysDown = {};
+var bulletSpeed = 2;
+
+canvas.onclick = function(e) {
+    console.log(e.clientX, e.clientY, e.pageX, e.pageY);
+    shoot(e.clientX, e.clientY);
+};
 
 addEventListener("keydown", function (e) {
 	keysDown[e.keyCode] = true;
@@ -47,14 +55,39 @@ addEventListener("keyup", function (e) {
 	delete keysDown[e.keyCode];
 }, false);
 
-// Reset the game when the player catches a monster
+setInterval(function() {addMonster();}, 3000);
+
+function addMonster() {
+    var monster = {};
+    monster.x = canvas.width;
+    monster.y = 32 + (Math.random() * (canvas.height - 64));
+    monster.vx = -1;
+    monster.vy = 0;
+    monsters.push(monster);
+}
+
+function shoot(x, y) {
+    var dx = x - hero.x;
+    var dy = y - hero.y;
+    var d = Math.sqrt(dx * dx + dy * dy);
+
+    var vx = dx / d * bulletSpeed;
+    var vy = dy / d * bulletSpeed;
+
+    bullets.push({x: hero.x,
+		  y: hero.y,
+		  vx: vx,
+		  vy: vy});
+    
+}
+
 var reset = function () {
 	hero.x = canvas.width / 2;
 	hero.y = canvas.height / 2;
 
-	// Throw the monster somewhere on the screen randomly
-	monster.x = 32 + (Math.random() * (canvas.width - 64));
-	monster.y = 32 + (Math.random() * (canvas.height - 64));
+    // Throw the monster somewhere on the screen randomly
+    monsters = [];
+    addMonster();
 };
 
 // Update game objects
@@ -72,7 +105,13 @@ var update = function (modifier) {
 		hero.x += hero.speed * modifier;
 	}
 
-	// Are they touching?
+    // Are they touching?
+    for (var bullet of bullets) {
+	bullet.x += bullet.vx;
+	bullet.y += bullet.vy;
+    }
+    
+    for (var monster of monsters) {
 	if (
 		hero.x <= (monster.x + 32)
 		&& monster.x <= (hero.x + 32)
@@ -82,6 +121,9 @@ var update = function (modifier) {
 		++monstersCaught;
 		reset();
 	}
+	monster.x += monster.vx;
+	monster.y += monster.vy;
+    }
 };
 
 // Draw everything
@@ -94,10 +136,17 @@ var render = function () {
 		ctx.drawImage(heroImage, hero.x, hero.y);
 	}
 
-	if (monsterReady) {
-		ctx.drawImage(monsterImage, monster.x, monster.y);
+    if (monsterReady) {
+	for (var monster of monsters) {
+	    ctx.drawImage(monsterImage, monster.x, monster.y);
 	}
-
+    }
+    for (var bullet of bullets) {
+	
+	ctx.beginPath();
+	ctx.arc(bullet.x, bullet.y, 10, 0, 2*Math.PI);
+	ctx.stroke();
+    }
 	// Score
 	ctx.fillStyle = "rgb(250, 250, 250)";
 	ctx.font = "24px Helvetica";
