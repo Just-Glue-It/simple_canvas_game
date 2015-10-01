@@ -5,33 +5,23 @@ canvas.width = 512;
 canvas.height = 480;
 document.body.appendChild(canvas);
 
-// Background image
-var bgReady = false;
-var bgImage = new Image();
-bgImage.onload = function () {
-	bgReady = true;
+var loadImage = function(src) {
+    var image = { ready: false,
+		  img: new Image() };
+    image.img.onload = function() {
+	image.ready = true;
+    };
+    image.img.src = src;
+    return image;
 };
-bgImage.src = "images/background.png";
 
-// Hero image
-var heroReady = false;
-var heroImage = new Image();
-heroImage.onload = function () {
-	heroReady = true;
-};
-heroImage.src = "images/hero.png";
-
-// Monster image
-var monsterReady = false;
-var monsterImage = new Image();
-monsterImage.onload = function () {
-	monsterReady = true;
-};
-monsterImage.src = "images/monster.png";
+var bgImage = loadImage("images/background.png");
+var heroImage = loadImage("images/hero.png");
+var monsterImage = loadImage("images/monster.png");
 
 // Game objects
 var hero = {
-	speed: 256 // movement in pixels/s
+    speed: 256 // movement in pixels/s
 };
 var monsters = [];
 var bullets = [];
@@ -41,139 +31,139 @@ var keysDown = {};
 var bulletSpeed = 2;
 
 canvas.onclick = function (e) {
-  console.log(e.clientX, e.clientY, e.pageX, e.pageY);
-  shoot(e.clientX, e.clientY);
+    console.log(e.clientX, e.clientY, e.pageX, e.pageY);
+    shoot(e.clientX, e.clientY);
 };
 
 addEventListener("keydown", function (e) {
-	keysDown[e.keyCode] = true;
+    keysDown[e.keyCode] = true;
 }, false);
 
 addEventListener("keyup", function (e) {
-	delete keysDown[e.keyCode];
+    delete keysDown[e.keyCode];
 }, false);
 
 setInterval(function () {addMonster();}, 3000);
 
 var addMonster = function () {
-  var monster = {
-		x: canvas.width,
-		y: 32 + (Math.random() * (canvas.height - 64)),
-		vx: -1,
-		vy: 0
-	};
-  monsters.push(monster);
-}
+    var monster = {
+	x: canvas.width,
+	y: 32 + (Math.random() * (canvas.height - 64)),
+	vx: -1,
+	vy: 0
+    };
+    monsters.push(monster);
+};
 
 var shoot = function (x, y) {
-  var dx = x - hero.x;
-  var dy = y - hero.y;
-  var d = Math.sqrt(dx * dx + dy * dy);
+    var dx = x - hero.x;
+    var dy = y - hero.y;
+    var d = Math.sqrt(dx * dx + dy * dy);
 
-  var vx = dx / d * bulletSpeed;
-  var vy = dy / d * bulletSpeed;
+    var vx = dx / d * bulletSpeed;
+    var vy = dy / d * bulletSpeed;
 
-  bullets.push({
-		x: hero.x,
+    bullets.push({
+	x: hero.x,
   	y: hero.y,
   	vx: vx,
   	vy: vy
-	});
+    });
 }
 
 var reset = function () {
-	hero.x = canvas.width / 2;
-	hero.y = canvas.height / 2;
+    hero.x = canvas.width / 2;
+    hero.y = canvas.height / 2;
 
-  // Throw the monster somewhere on the screen randomly
-  monsters = [];
-  addMonster();
+    // Throw the monster somewhere on the screen randomly
+    monsters = [];
+    addMonster();
 };
 
 // Update game objects
 var update = function (modifier) {
-	if (38 in keysDown) { // Player holding up
-		hero.y -= hero.speed * modifier;
-	}
-	if (40 in keysDown) { // Player holding down
-		hero.y += hero.speed * modifier;
-	}
-	if (37 in keysDown) { // Player holding left
-		hero.x -= hero.speed * modifier;
-	}
-	if (39 in keysDown) { // Player holding right
-		hero.x += hero.speed * modifier;
-	}
+    if (38 in keysDown) { // Player holding up
+	hero.y -= hero.speed * modifier;
+    }
+    if (40 in keysDown) { // Player holding down
+	hero.y += hero.speed * modifier;
+    }
+    if (37 in keysDown) { // Player holding left
+	hero.x -= hero.speed * modifier;
+    }
+    if (39 in keysDown) { // Player holding right
+	hero.x += hero.speed * modifier;
+    }
 
-	// Are they touching?
-	for (var bullet of bullets) {
-		bullet.x += bullet.vx;
-		bullet.y += bullet.vy;
-	}
+    // Are they touching?
+    for (var bullet of bullets) {
+	bullet.x += bullet.vx;
+	bullet.y += bullet.vy;
+    }
 
-  for (var monster of monsters) {
-		if (
-			hero.x <= (monster.x + 32)
-			&& monster.x <= (hero.x + 32)
-			&& hero.y <= (monster.y + 32)
-			&& monster.y <= (hero.y + 32)
-		) {
-			localStorage.monstersCaught = Number(localStorage.monstersCaught) + 1;
-			reset();
-		}
-		monster.x += monster.vx;
-		monster.y += monster.vy;
+    for (var monster of monsters) {
+	if (
+	    hero.x <= (monster.x + 32)
+		&& monster.x <= (hero.x + 32)
+		&& hero.y <= (monster.y + 32)
+		&& monster.y <= (hero.y + 32)
+	) {
+	    localStorage.monstersCaught = Number(localStorage.monstersCaught) + 1;
+	    reset();
 	}
+	monster.x += monster.vx;
+	monster.y += monster.vy;
+    }
 };
 
 // Draw everything
 var render = function () {
-	if (bgReady) {
-		ctx.drawImage(bgImage, 0, 0);
+    if (bgImage.ready) {
+	ctx.drawImage(bgImage.img, 0, 0);
+    }
+
+    if (heroImage.ready) {
+	ctx.drawImage(heroImage.img, hero.x, hero.y);
+    }
+
+    if (monsterImage.ready) {
+	for (var monster of monsters) {
+	    ctx.drawImage(monsterImage.img, monster.x, monster.y);
 	}
+    }
 
-	if (heroReady) {
-		ctx.drawImage(heroImage, hero.x, hero.y);
-	}
+    for (var bullet of bullets) {
+	ctx.fillStyle = "Orange";
+	ctx.beginPath();
+	ctx.arc(bullet.x, bullet.y, 10, 0, 2*Math.PI);
+	ctx.closePath();
+	ctx.fill();
+    }
 
-  if (monsterReady) {
-		for (var monster of monsters) {
-		    ctx.drawImage(monsterImage, monster.x, monster.y);
-		}
-  }
+    if (!localStorage.monstersCaught) {
+	localStorage.monstersCaught = 0;
+    }
 
-	for (var bullet of bullets) {
-		ctx.fillStyle = "Orange";
-		ctx.beginPath();
-		ctx.arc(bullet.x, bullet.y, 10, 0, 2*Math.PI);
-		ctx.closePath();
-		ctx.fill();
-	}
-
-	if (!localStorage.monstersCaught) {
-		localStorage.monstersCaught = 0;
-	}
-
-	// Score
-	ctx.fillStyle = "rgb(250, 250, 250)";
-	ctx.font = "24px Helvetica";
-	ctx.textAlign = "left";
-	ctx.textBaseline = "top";
-	ctx.fillText("Goblins caught: " + localStorage.monstersCaught, 32, 32);
+    // Score
+    ctx.fillStyle = "rgb(250, 250, 250)";
+    ctx.font = "24px Helvetica";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+    ctx.fillText("Goblins caught: " + localStorage.monstersCaught, 32, 32);
 };
 
 // The main game loop
 var main = function () {
-	var now = Date.now();
-	var delta = now - then;
+    var now = Date.now();
+    var delta = now - then;
 
-	update(delta / 1000);
-	render();
+    update(delta / 1000);
+    render();
 
-	then = now;
+    then = now;
 
-	// Request to do this again ASAP
-	requestAnimationFrame(main);
+    // Request to do this again ASAP
+    requestAnimationFrame(main);
 };
 
 // Cross-browser support for requestAnimationFrame
