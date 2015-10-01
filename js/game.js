@@ -1,8 +1,10 @@
+/*eslint-disable */
+
 // Create the canvas
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+canvas.width = 512;
+canvas.height = 480;
 document.body.appendChild(canvas);
 
 // Background image
@@ -31,19 +33,18 @@ monsterImage.src = "images/monster.png";
 
 // Game objects
 var hero = {
-	speed: 256 // movement in pixels per second
+	speed: 256 // movement in pixels/s
 };
 var monsters = [];
 var bullets = [];
-var monstersCaught = 0;
 
 // Handle keyboard controls
 var keysDown = {};
 var bulletSpeed = 2;
 
 canvas.onclick = function (e) {
-    console.log(e.clientX, e.clientY, e.pageX, e.pageY);
-    shoot(e.clientX, e.clientY);
+  console.log(e.clientX, e.clientY, e.pageX, e.pageY);
+  shoot(e.clientX, e.clientY);
 };
 
 addEventListener("keydown", function (e) {
@@ -74,14 +75,12 @@ var shoot = function (x, y) {
   var vx = dx / d * bulletSpeed;
   var vy = dy / d * bulletSpeed;
 
-  bullets.push(
-		{
-			x: hero.x,
-	  	y: hero.y,
-	  	vx: vx,
-	  	vy: vy
-		}
-	);
+  bullets.push({
+		x: hero.x,
+  	y: hero.y,
+  	vx: vx,
+  	vy: vy
+	});
 }
 
 var reset = function () {
@@ -121,7 +120,7 @@ var update = function (modifier) {
 			&& hero.y <= (monster.y + 32)
 			&& monster.y <= (hero.y + 32)
 		) {
-			++monstersCaught;
+			localStorage.monstersCaught = Number(localStorage.monstersCaught) + 1;
 			reset();
 		}
 		monster.x += monster.vx;
@@ -146,16 +145,23 @@ var render = function () {
   }
 
 	for (var bullet of bullets) {
+		ctx.fillStyle = "Orange";
 		ctx.beginPath();
 		ctx.arc(bullet.x, bullet.y, 10, 0, 2*Math.PI);
-		ctx.stroke();
+		ctx.closePath();
+		ctx.fill();
 	}
+
+	if (!localStorage.monstersCaught) {
+		localStorage.monstersCaught = 0;
+	}
+
 	// Score
 	ctx.fillStyle = "rgb(250, 250, 250)";
 	ctx.font = "24px Helvetica";
 	ctx.textAlign = "left";
 	ctx.textBaseline = "top";
-	ctx.fillText("Goblins caught: " + monstersCaught, 32, 32);
+	ctx.fillText("Goblins caught: " + localStorage.monstersCaught, 32, 32);
 };
 
 // The main game loop
