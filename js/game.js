@@ -19,9 +19,20 @@ var bgImage = loadImage("images/background.png");
 var heroImage = loadImage("images/hero.png");
 var monsterImage = loadImage("images/monster.png");
 
+var keys = {
+    up: 38,
+    down: 40,
+    left: 37,
+    right: 39
+};
+
 // Game objects
 var hero = {
-    speed: 256 // movement in pixels/s
+    speed: 256, // movement in pixels/s
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    w: 32,
+    h: 32
 };
 var monsters = [];
 var bullets = [];
@@ -30,8 +41,8 @@ var bullets = [];
 var keysDown = {};
 var bulletSpeed = 2;
 
+// clicking shoots towards the mouose
 canvas.onclick = function (e) {
-    console.log(e.clientX, e.clientY, e.pageX, e.pageY);
     shoot(e.clientX, e.clientY);
 };
 
@@ -50,7 +61,9 @@ var addMonster = function () {
 	x: canvas.width,
 	y: 32 + (Math.random() * (canvas.height - 64)),
 	vx: -1,
-	vy: 0
+	vy: 0,
+	w: 32, // image size
+	h: 32
     };
     monsters.push(monster);
 };
@@ -67,7 +80,8 @@ var shoot = function (x, y) {
 	x: hero.x,
   	y: hero.y,
   	vx: vx,
-  	vy: vy
+  	vy: vy,
+	r: 10
     });
 }
 
@@ -75,45 +89,74 @@ var reset = function () {
     hero.x = canvas.width / 2;
     hero.y = canvas.height / 2;
 
-    // Throw the monster somewhere on the screen randomly
     monsters = [];
-    addMonster();
+};
+
+var catchMonster = function(monster) {
+    localStorage.monstersCaught = Number(localStorage.monstersCaught) + 1;
+    console.log('caught a monster', monster);
 };
 
 // Update game objects
 var update = function (modifier) {
-    if (38 in keysDown) { // Player holding up
+    if (keys.up in keysDown) { // Player holding up
 	hero.y -= hero.speed * modifier;
     }
-    if (40 in keysDown) { // Player holding down
+    if (keys.down in keysDown) { // Player holding down
 	hero.y += hero.speed * modifier;
     }
-    if (37 in keysDown) { // Player holding left
+    if (keys.left in keysDown) { // Player holding left
 	hero.x -= hero.speed * modifier;
     }
-    if (39 in keysDown) { // Player holding right
+    if (keys.right in keysDown) { // Player holding right
 	hero.x += hero.speed * modifier;
     }
 
-    // Are they touching?
+    var killedMonsters = [];
+    var killedBullets = [];
+    
+    // check if bullets are touching monsters
+    bullets.forEach(function (bullet) {
+	monsters.forEach(function (monster) {
+	    if (bullet.x + bullet.r >= monster.x
+		&& bullet.x <= monster.x + monster.w
+		&& bullet.y + bullet.r >= monster.y
+		&& bullet.y <= monster.y + monster.h) {
+		// we've hit him
+		catchMonster(monster);
+		killedMonsters.push(monster);
+		killedBullets.push(bullet);
+	    }
+	});
+    });
+	
+    killedMonsters.forEach(function (monster) {
+	monsters.splice(monsters.indexOf(monster), 1);
+    });
+    
+	
+    killedBullets.forEach(function (bullet) {
+	bullets.splice(bullets.indexOf(bullet), 1);
+    });
+    
+    // update bullets
     for (var bullet of bullets) {
 	bullet.x += bullet.vx;
 	bullet.y += bullet.vy;
     }
 
+    // Are they touching?
     for (var monster of monsters) {
-	if (
-	    hero.x <= (monster.x + 32)
-		&& monster.x <= (hero.x + 32)
-		&& hero.y <= (monster.y + 32)
-		&& monster.y <= (hero.y + 32)
-	) {
-	    localStorage.monstersCaught = Number(localStorage.monstersCaught) + 1;
+	if (hero.x <= (monster.x + monster.w)
+	    && monster.x <= (hero.x + hero.w)
+	    && hero.y <= (monster.y + hero.h)
+	    && monster.y <= (hero.y + hero.h)) {
 	    reset();
 	}
 	monster.x += monster.vx;
 	monster.y += monster.vy;
     }
+    
 };
 
 // Draw everything
@@ -135,7 +178,7 @@ var render = function () {
     for (var bullet of bullets) {
 	ctx.fillStyle = "Orange";
 	ctx.beginPath();
-	ctx.arc(bullet.x, bullet.y, 10, 0, 2*Math.PI);
+	ctx.arc(bullet.x, bullet.y, bullet.r, 0, 2*Math.PI);
 	ctx.closePath();
 	ctx.fill();
     }
