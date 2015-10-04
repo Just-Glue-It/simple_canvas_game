@@ -5,9 +5,11 @@ canvas.width = 512;
 canvas.height = 480;
 document.body.appendChild(canvas);
 
-var loadImage = function(src) {
-  var image = { ready: false,
-		img: new Image() };
+var loadImage = function (src) {
+  var image = {
+    ready: false,
+		img: new Image()
+  };
   image.img.onload = function() {
     image.ready = true;
   };
@@ -15,21 +17,22 @@ var loadImage = function(src) {
   return image;
 };
 
+var loadAudio = function (src) {
+  return new Audio(src);
+};
+
 var bgImage = loadImage("images/background.png");
 var heroImage = loadImage("images/hero.png");
 var monsterImage = loadImage("images/monster.png");
 
-var keys = {
-  up: 38,
-  down: 40,
-  left: 37,
-  right: 39
-};
+var bgAudio = loadAudio();
+var catchSound = loadAudio();
+var escSound = loadAudio(); // STILL NEEDS AUDIO FILE
 
 // Game objects
 var hero = {
-  speed: 256, // movement in pixels/s
-  x: canvas.width / 2,
+  // speed: 256, DEPRECATED - hero doesn't move
+  x: canvas.width / 16,
   y: canvas.height / 2,
   w: 32,
   h: 32
@@ -41,7 +44,7 @@ var bullets = [];
 var keysDown = {};
 var bulletSpeed = 2;
 
-// clicking shoots towards the mouose
+// clicking shoots towards the mouse
 canvas.onclick = function (e) {
   shoot(e.clientX, e.clientY);
 };
@@ -86,35 +89,26 @@ var shoot = function (x, y) {
 }
 
 var reset = function () {
-  hero.x = canvas.width / 2;
-  hero.y = canvas.height / 2;
-
   monsters = [];
+};  // DEPRECATED - as we dont need to eliminate all monsters from screen and hero isn't moving -- soon
+
+var catchMonster = function (monster) {
+  localStorage.monstersCaught = Number(localStorage.monstersCaught) + 1;
+  catchSound.play();
+  console.log('caught a monster', monster);
 };
 
-var catchMonster = function(monster) {
-  localStorage.monstersCaught = Number(localStorage.monstersCaught) + 1;
-  console.log('caught a monster', monster);
+var monsterEscape = function (monster) {
+  localStorage.monstersEscaped = Number(localStorage.monstersEscaped) + 1;
+  escSound.play();
+  console.log('a monster escaped', monster);
 };
 
 // Update game objects
 var update = function (modifier) {
-  if (keys.up in keysDown) { // Player holding up
-    hero.y -= hero.speed * modifier;
-  }
-  if (keys.down in keysDown) { // Player holding down
-    hero.y += hero.speed * modifier;
-  }
-  if (keys.left in keysDown) { // Player holding left
-    hero.x -= hero.speed * modifier;
-  }
-  if (keys.right in keysDown) { // Player holding right
-    hero.x += hero.speed * modifier;
-  }
-
   var killedMonsters = [];
   var killedBullets = [];
-  
+
   // check if bullets are touching monsters
   bullets.forEach(function (bullet) {
     monsters.forEach(function (monster) {
@@ -122,23 +116,24 @@ var update = function (modifier) {
 	  && bullet.x <= monster.x + monster.w
 	  && bullet.y + bullet.r >= monster.y
 	  && bullet.y <= monster.y + monster.h) {
-	// we've hit him
-	catchMonster(monster);
-	killedMonsters.push(monster);
-	killedBullets.push(bullet);
+    	// we've hit him
+    	catchMonster(monster);
+      monsterEscape(monster);
+    	killedMonsters.push(monster);
+    	killedBullets.push(bullet);
       }
     });
   });
-  
+
   killedMonsters.forEach(function (monster) {
     monsters.splice(monsters.indexOf(monster), 1);
   });
-  
-  
+
+
   killedBullets.forEach(function (bullet) {
     bullets.splice(bullets.indexOf(bullet), 1);
   });
-  
+
   // update bullets
   for (var bullet of bullets) {
     bullet.x += bullet.vx;
@@ -148,15 +143,14 @@ var update = function (modifier) {
   // Are they touching?
   for (var monster of monsters) {
     if (hero.x <= (monster.x + monster.w)
-	&& monster.x <= (hero.x + hero.w)
-	&& hero.y <= (monster.y + hero.h)
-	&& monster.y <= (hero.y + hero.h)) {
+      	&& monster.x <= (hero.x + hero.w)
+      	&& hero.y <= (monster.y + hero.h)
+      	&& monster.y <= (hero.y + hero.h)) {
       reset();
     }
     monster.x += monster.vx;
     monster.y += monster.vy;
   }
-  
 };
 
 // Draw everything
@@ -185,6 +179,7 @@ var render = function () {
 
   if (!localStorage.monstersCaught) {
     localStorage.monstersCaught = 0;
+    localStorage.monstersEscaped = 0;
   }
 
   // Score
@@ -192,7 +187,7 @@ var render = function () {
   ctx.font = "24px Helvetica";
   ctx.textAlign = "left";
   ctx.textBaseline = "top";
-  ctx.fillText("Goblins caught: " + localStorage.monstersCaught, 32, 32);
+  ctx.fillText("Goblins caught: " + localStorage.monstersCaught + "    escaped: " + localStorage.monstersEscaped, 32, 32);
 };
 
 // The main game loop
@@ -207,6 +202,7 @@ var main = function () {
 
   // Request to do this again ASAP
   requestAnimationFrame(main);
+  bgAudio.play();
 };
 
 // Cross-browser support for requestAnimationFrame
