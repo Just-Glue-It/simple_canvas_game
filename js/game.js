@@ -1,8 +1,8 @@
 // Create the canvas
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
-canvas.width = 512;
-canvas.height = 480;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 document.body.appendChild(canvas);
 
 var loadImage = function (src) {
@@ -21,9 +21,9 @@ var loadAudio = function (src) {
   return new Audio(src);
 };
 
-var bgImage = loadImage("images/background.png");
-var heroImage = loadImage("images/hero.png");
-var monsterImage = loadImage("images/monster.png");
+var bgImage = loadImage("images/background.jpg");
+var heroImage = loadImage("images/hero.gif");
+var monsterImage = loadImage("images/monster.gif");
 
 var bgAudio = loadAudio();
 var catchSound = loadAudio();
@@ -118,20 +118,10 @@ var update = function (modifier) {
 	  && bullet.y <= monster.y + monster.h) {
     	// we've hit him
     	catchMonster(monster);
-      monsterEscape(monster);
     	killedMonsters.push(monster);
     	killedBullets.push(bullet);
       }
     });
-  });
-
-  killedMonsters.forEach(function (monster) {
-    monsters.splice(monsters.indexOf(monster), 1);
-  });
-
-
-  killedBullets.forEach(function (bullet) {
-    bullets.splice(bullets.indexOf(bullet), 1);
   });
 
   // update bullets
@@ -151,6 +141,14 @@ var update = function (modifier) {
     monster.x += monster.vx;
     monster.y += monster.vy;
   }
+
+  killedMonsters.forEach(function (monster) {
+    monsters.splice(monsters.indexOf(monster), 1);
+  });
+
+  killedBullets.forEach(function (bullet) {
+    bullets.splice(bullets.indexOf(bullet), 1);
+  });
 };
 
 // Draw everything
