@@ -108,7 +108,7 @@ var monsterEscape = function (monster) {
 
 // Update game objects
 var update = function (modifier) {
-  var killedMonsters = [];
+  var monstersToRemove = [];
   var killedBullets = [];
 
   // check if bullets are touching monsters
@@ -120,7 +120,7 @@ var update = function (modifier) {
 	  && bullet.y <= monster.y + monster.h) {
     	// we've hit him
     	catchMonster(monster);
-    	killedMonsters.push(monster);
+    	monstersToRemove.push(monster);
     	killedBullets.push(bullet);
       }
     });
@@ -151,7 +151,14 @@ var update = function (modifier) {
     monster.y += monster.vy;
   }
 
-  killedMonsters.forEach(function (monster) {
+  monsters.forEach(function (monster) {
+    if (monster.x <= 0) {
+      monsterEscape(monster);
+      monstersToRemove.push(monster);
+    }
+  });
+
+  monstersToRemove.forEach(function (monster) {
     monsters.splice(monsters.indexOf(monster), 1);
   });
 
