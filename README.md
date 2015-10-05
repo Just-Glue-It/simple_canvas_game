@@ -12,7 +12,7 @@ hero to the direction of P, provided P is not in the hero’s icon
 - [ ] when goblin hit, play sound
 - [ ] when goblin hit left edge, update number of escaped
 - [ ] play sound when goblin escapes
-- [ ] if goblin hits hero, goblin should be considered shot
+- [X] if goblin hits hero, goblin should be considered shot
 - [X] fullscreen
 - [X] bg image should cover entire screen
 - [X] use local storage for goblins caught
