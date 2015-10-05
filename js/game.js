@@ -168,8 +168,6 @@ var render = function () {
 
   if (heroImage.ready) {
     ctx.drawImage(heroImage.img, hero.x, hero.y);
-    ctx.rect(hero.x, hero.y, hero.w, hero.h);
-    ctx.stroke();
   }
 
   if (monsterImage.ready) {
