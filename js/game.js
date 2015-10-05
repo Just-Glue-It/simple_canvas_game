@@ -45,7 +45,7 @@ var bulletSpeed = 2;
 
 // clicking shoots towards the mouse
 canvas.onclick = function (e) {
-  shoot(e.clientX, e.clientY);
+  shoot(e.pageX, e.pageY);
 };
 
 addEventListener("keydown", function (e) {
@@ -71,6 +71,9 @@ var addMonster = function () {
 };
 
 var shoot = function (x, y) {
+  if (x > hero.x && x < hero.x + hero.w && y > hero.y && y < hero.y + hero.h) {
+    return;
+  }
   var dx = x - hero.x;
   var dy = y - hero.y;
   var d = Math.sqrt(dx * dx + dy * dy);
@@ -79,8 +82,8 @@ var shoot = function (x, y) {
   var vy = dy / d * bulletSpeed;
 
   bullets.push({
-    x: hero.x,
-    y: hero.y,
+    x: hero.x + hero.w / 2,
+    y: hero.y + hero.h / 2,
     vx: vx,
     vy: vy,
     r: 10
@@ -165,6 +168,8 @@ var render = function () {
 
   if (heroImage.ready) {
     ctx.drawImage(heroImage.img, hero.x, hero.y);
+    ctx.rect(hero.x, hero.y, hero.w, hero.h);
+    ctx.stroke();
   }
 
   if (monsterImage.ready) {

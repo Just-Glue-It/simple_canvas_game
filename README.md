@@ -3,7 +3,7 @@
 - [X] can't change pos in game
 - [X] Every three seconds a goblin appears at a random point on the right edge of the screen.
 - [X] The goblins move horizontally toward the left edge of the screen.
-- [ ] A mousedown event on a point P on the screen triggers a bullet firing from the center of the
+- [X] A mousedown event on a point P on the screen triggers a bullet firing from the center of the
 hero to the direction of P, provided P is not in the hero’s icon
 - [X] bullets destroyed when goblin hit
 - [X] bullet destroyed when hits edge of screen
