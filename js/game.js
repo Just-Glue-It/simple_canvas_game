@@ -31,7 +31,6 @@ var escSound = loadAudio(); // STILL NEEDS AUDIO FILE
 
 // Game objects
 var hero = {
-  // speed: 256, DEPRECATED - hero doesn't move
   x: canvas.width / 16,
   y: canvas.height / 2,
   w: 32,
@@ -122,6 +121,13 @@ var update = function (modifier) {
     	killedBullets.push(bullet);
       }
     });
+
+    if (bullet.x < 0
+    || bullet.x > canvas.width
+    || bullet.y < 0
+    || bullet.y > canvas.height) {
+      killedBullets.push(bullet);
+    }
   });
 
   // update bullets
@@ -177,6 +183,9 @@ var render = function () {
 
   if (!localStorage.monstersCaught) {
     localStorage.monstersCaught = 0;
+  }
+
+  if (!localStorage.monstersEscaped) {
     localStorage.monstersEscaped = 0;
   }
 

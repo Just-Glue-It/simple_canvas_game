@@ -6,7 +6,7 @@
 - [ ] A mousedown event on a point P on the screen triggers a bullet firing from the center of the
 hero to the direction of P, provided P is not in the hero’s icon
 - [X] bullets destroyed when goblin hit
-- [ ] bullet destroyed when hits edge of screen
+- [X] bullet destroyed when hits edge of screen
 - [X] goblin destroyed when hit
 - [X] number of goblins caught should update when a goblin is caught
 - [ ] when goblin hit, play sound
