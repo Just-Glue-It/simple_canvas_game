@@ -41,7 +41,7 @@ var bullets = [];
 
 // Handle keyboard controls
 var keysDown = {};
-var bulletSpeed = 2;
+var bulletSpeed = 10;
 
 // clicking shoots towards the mouse
 canvas.onclick = function (e) {
@@ -62,8 +62,8 @@ var addMonster = function () {
   var monster = {
     x: canvas.width,
     y: 32 + (Math.random() * (canvas.height - 64)),
-    vx: -1,
-    vy: 0,
+    vx: -3,
+    vy: (Math.random() - 0.5) * 5,
     w: 32, // image size
     h: 32
   };
@@ -150,6 +150,10 @@ var update = function (modifier) {
     }
     monster.x += monster.vx;
     monster.y += monster.vy;
+    
+    var mult = monster.x / canvas.width;
+    var wave = Math.sin(Date.now() / 200) * 0.1 * (mult);
+    monster.vy += (1-mult) * (1-mult)* ((canvas.height / 2) - monster.y)  / canvas.height * 1;
   }
 
   killedMonsters.forEach(function (monster) {
