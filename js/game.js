@@ -146,7 +146,7 @@ var update = function (modifier) {
       	&& hero.y <= (monster.y + hero.h)
       	&& monster.y <= (hero.y + hero.h)) {
       catchMonster(monster);
-      killedMonsters.push(monster);
+      monstersToRemove.push(monster);
     }
     monster.x += monster.vx;
     monster.y += monster.vy;
