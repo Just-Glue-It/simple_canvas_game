@@ -8,7 +8,7 @@ document.body.appendChild(canvas);
 var loadImage = function (src) {
   var image = {
     ready: false,
-		img: new Image()
+    img: new Image()
   };
   image.img.onload = function() {
     image.ready = true;
@@ -25,9 +25,9 @@ var bgImage = loadImage("images/background.jpg");
 var heroImage = loadImage("images/hero.gif");
 var monsterImage = loadImage("images/monster.gif");
 
-var bgAudio = loadAudio();
-var catchSound = loadAudio();
-var escSound = loadAudio(); // STILL NEEDS AUDIO FILE
+var bgAudio = loadAudio("sounds/pushing_onwards.ogg");
+var catchSound = loadAudio("sounds/catch.wav");
+var escSound = loadAudio("sounds/escaped.wav"); // STILL NEEDS AUDIO FILE
 
 // Game objects
 var hero = {
@@ -63,7 +63,7 @@ var addMonster = function () {
     x: canvas.width,
     y: 32 + (Math.random() * (canvas.height - 64)),
     vx: -3,
-    vy: (Math.random() - 0.5) * 5,
+    vy: 0,
     w: 32, // image size
     h: 32
   };
@@ -126,9 +126,9 @@ var update = function (modifier) {
     });
 
     if (bullet.x < 0
-    || bullet.x > canvas.width
-    || bullet.y < 0
-    || bullet.y > canvas.height) {
+        || bullet.x > canvas.width
+        || bullet.y < 0
+        || bullet.y > canvas.height) {
       killedBullets.push(bullet);
     }
   });
@@ -150,10 +150,6 @@ var update = function (modifier) {
     }
     monster.x += monster.vx;
     monster.y += monster.vy;
-    
-    var mult = monster.x / canvas.width;
-    var wave = Math.sin(Date.now() / 200) * 0.1 * (mult);
-    monster.vy += (1-mult) * (1-mult)* ((canvas.height / 2) - monster.y)  / canvas.height * 1;
   }
 
   monsters.forEach(function (monster) {
